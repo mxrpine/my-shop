@@ -21,9 +21,7 @@
   </footer>
 
   <script>
-    // 👉 ЛОКАЛЬНО: http://localhost:3000
-    // 👉 ПОСЛЕ ДЕПЛОЯ: замени на https://<твое-имя>.up.railway.app
-    const BACKEND_URL = "http://localhost:3000";
+    const BACKEND_URL = "https://my-shop-production.up.railway.app/";
 
     async function loadProducts() {
       const res = await fetch(BACKEND_URL + "/products");
