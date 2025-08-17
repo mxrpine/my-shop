@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Мой интернет‑магазин</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Магазин</h1>
+    <p class="hint">Если запускаешь локально — оставь адрес по умолчанию. После деплоя поменяй BACKEND_URL на свой Railway URL.</p>
+  </header>
+
+  <main>
+    <div id="products" class="grid"></div>
+  </main>
+
+  <footer>
+    <small>Прототип магазина на JS. Заказы отправляются на backend.</small>
+  </footer>
+
+  <script>
+    // 👉 ЛОКАЛЬНО: http://localhost:3000
+    // 👉 ПОСЛЕ ДЕПЛОЯ: замени на https://<твое-имя>.up.railway.app
+    const BACKEND_URL = "http://localhost:3000";
+
+    async function loadProducts() {
+      const res = await fetch(BACKEND_URL + "/products");
+      const products = await res.json();
+      const container = document.getElementById("products");
+      container.innerHTML = products.map(p => `
+        <div class="card">
+          <h3>${p.name}</h3>
+          <p class="price">${p.price} ₽</p>
+          <button onclick='order(${JSON.stringify(p)})'>Купить</button>
+        </div>
+      `).join("");
+    }
+
+    async function order(product) {
+      const name = prompt("Ваше имя?");
+      const phone = prompt("Ваш телефон?");
+      if (!name || !phone) return alert("Нужно указать имя и телефон.");
+      const res = await fetch(BACKEND_URL + "/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id, product: product.name, price: product.price, name, phone })
+      });
+      const data = await res.json();
+      alert(data.message || "Готово");
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>
