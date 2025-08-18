@@ -79,7 +79,8 @@
     async function order(product) {
       const name = prompt("Ваше имя?");
       const phone = prompt("Ваш телефон?");
-      if (!name || !phone) return alert("Нужно указать имя и телефон.");
+      const adress = prompt("Ваш адрес?");
+      if (!name || !phone || !adress) return alert("Нужно указать имя, адресс и телефон.");
       const res = await fetch(BACKEND_URL + "/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
