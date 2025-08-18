@@ -3,25 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Мой интернет‑магазин</title>
+  <title>Outcast</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-    header, footer { background: #f8f8f8; padding: 1em; text-align: center; }
-    .grid { display: flex; flex-wrap: wrap; gap: 1em; justify-content: center; padding: 1em; }
-    .card { border: 1px solid #ddd; border-radius: 6px; padding: 1em; width: 200px; text-align: center; }
-    .price { font-weight: bold; margin: 0.5em 0; }
-    button { padding: 0.5em 1em; border: none; background: #28a745; color: white; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #218838; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      background: #fff;
+    }
+    .card img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .price {
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    button {
+      background: #2d89ef;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1a5fbe;
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>Магазин</h1>
+    <p class="hint">Тестовый магазин на JS. Заказы идут на backend.</p>
   </header>
 
   <main>
-    <div id="products" class="grid">Загрузка товаров...</div>
+    <div id="products" class="grid"></div>
   </main>
 
   <footer>
@@ -29,45 +54,39 @@
   </footer>
 
   <script>
-    // Вставь сюда URL своего backend без "/products"
     const BACKEND_URL = "https://my-shop-production.up.railway.app";
 
-    async function loadProducts() {
-      try {
-        const res = await fetch(BACKEND_URL + "/products");
-        if (!res.ok) throw new Error("Ошибка загрузки товаров");
-        const products = await res.json();
-        const container = document.getElementById("products");
-        container.innerHTML = products.map(p => `
-          <div class="card">
-            <h3>${p.name}</h3>
-            <p class="price">${p.price} ₽</p>
-            <button onclick='order(${JSON.stringify(p)})'>Купить</button>
-          </div>
-        `).join("");
-      } catch (err) {
-        document.getElementById("products").innerText = "Не удалось загрузить товары";
-        console.error(err);
-      }
+    // Продукты можно хранить на backend (через API),
+    // но для примера добавим прямо тут:
+    const products = [
+      { id: 1, name: "Футболка", price: 1500, image: "images/tiska.jpg" },
+      { id: 2, name: "Ноутбук", price: 55000, image: "images/laptop.jpg" },
+      { id: 3, name: "Наушники", price: 3500, image: "images/headphones.jpg" }
+    ];
+
+    function loadProducts() {
+      const container = document.getElementById("products");
+      container.innerHTML = products.map(p => `
+        <div class="card">
+          <img src="${p.image}" alt="${p.name}">
+          <h3>${p.name}</h3>
+          <p class="price">${p.price} ₽</p>
+          <button onclick='order(${JSON.stringify(p)})'>Купить</button>
+        </div>
+      `).join("");
     }
 
     async function order(product) {
       const name = prompt("Ваше имя?");
       const phone = prompt("Ваш телефон?");
       if (!name || !phone) return alert("Нужно указать имя и телефон.");
-
-      try {
-        const res = await fetch(BACKEND_URL + "/order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId: product.id, product: product.name, price: product.price, name, phone })
-        });
-        const data = await res.json();
-        alert(data.message || "Заказ оформлен");
-      } catch (err) {
-        alert("Ошибка при оформлении заказа");
-        console.error(err);
-      }
+      const res = await fetch(BACKEND_URL + "/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id, product: product.name, price: product.price, name, phone })
+      });
+      const data = await res.json();
+      alert(data.message || "Готово");
     }
 
     loadProducts();
