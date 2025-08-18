@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Админка — заказы</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background: #2d89ef;
+      color: #fff;
+    }
+    tr:nth-child(even) {
+      background: #f3f6fa;
+    }
+    #login {
+      text-align: center;
+      margin-top: 100px;
+    }
+    #login input {
+      padding: 10px;
+      font-size: 16px;
+    }
+    #login button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Админка</h1>
+
+  <!-- Блок для ввода пароля -->
+  <div id="login">
+    <p>Введите пароль для доступа:</p>
+    <input type="password" id="password" placeholder="Пароль">
+    <button onclick="checkPassword()">Войти</button>
+    <p id="error" style="color:red;"></p>
+  </div>
+
+  <!-- Таблица заказов (по умолчанию скрыта) -->
+  <div id="ordersSection" style="display:none;">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Товар</th>
+          <th>Цена</th>
+          <th>Имя</th>
+          <th>Телефон</th>
+          <th>Дата</th>
+        </tr>
+      </thead>
+      <tbody id="orders">
+        <tr><td colspan="6">Загрузка...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const BACKEND_URL = "https://my-shop-production.up.railway.app";
+    const ADMIN_PASSWORD = "12345"; // 🛑 Задай свой пароль!
+
+    function checkPassword() {
+      const input = document.getElementById("password").value;
+      if (input === ADMIN_PASSWORD) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("ordersSection").style.display = "block";
+        loadOrders();
+      } else {
+        document.getElementById("error").innerText = "Неверный пароль!";
+      }
+    }
+
+    async function loadOrders() {
+      try {
+        const res = await fetch(BACKEND_URL + "/orders");
+        const orders = await res.json();
+
+        const tbody = document.getElementById("orders");
+        if (orders.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='6'>Заказов пока нет</td></tr>";
+          return;
+        }
+
+        tbody.innerHTML = orders.map(o => `
+          <tr>
+            <td>${o.id}</td>
+            <td>${o.product_name}</td>
+            <td>${o.price} ₽</td>
+            <td>${o.customer_name}</td>
+            <td>${o.customer_phone}</td>
+            <td>${new Date(o.created_at).toLocaleString()}</td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        console.error(err);
+        document.getElementById("orders").innerHTML =
+          "<tr><td colspan='6'>Ошибка загрузки заказов</td></tr>";
+      }
+    }
+  </script>
+</body>
+</html>
