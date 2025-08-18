@@ -38,13 +38,14 @@ app.post("/admin/login", (req, res) => {
 app.post("/order", (req, res) => {
   const order = req.body || {};
   const newOrder = {
-    id: orders.length + 1,
-    product: order.product,
-    price: order.price,
-    name: order.name,
-    phone: order.phone,
-    date: new Date()
-  };
+  id: orders.length + 1,
+  product: order.product,
+  price: order.price,
+  name: order.name,
+  phone: order.phone,
+  address: order.address, // <- здесь добавлено
+  date: new Date()
+};
   orders.push(newOrder);
   console.log("Новый заказ:", newOrder);
   res.json({ status: "ok", message: "Заказ принят!" });
