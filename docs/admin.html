@@ -3,14 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Админка заказов</title>
+  <title>Админка магазина</title>
   <style>
+    body { font-family: sans-serif; padding: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #eee; }
+    #loginForm { max-width: 300px; }
   </style>
 </head>
 <body>
-  <h1>Админка заказов</h1>
+
+<h1>Админка</h1>
+
+<div id="loginForm">
+  <input type="text" id="login" placeholder="Логин" /><br><br>
+  <input type="password" id="password" placeholder="Пароль" /><br><br>
+  <button onclick="login()">Войти</button>
+  <p id="loginError" style="color:red;"></p>
+</div>
+
+<div id="ordersContainer" style="display:none;">
+  <h2>Заказы</h2>
   <table>
     <thead>
       <tr>
@@ -24,28 +38,53 @@
     </thead>
     <tbody id="ordersTable"></tbody>
   </table>
+</div>
 
-  <script>
-    const BACKEND_URL = "https://my-shop-production.up.railway.app";
-    const ADMIN_PASSWORD = "0567"; // 🛑 Задай свой пароль!
+<script>
+const BACKEND_URL = "https://my-shop-production.up.railway.app"; // твой backend
 
-    async function loadOrders() {
-      const res = await fetch(BACKEND_URL + "/orders");
-      const orders = await res.json();
-      const table = document.getElementById("ordersTable");
-      table.innerHTML = orders.map(o => `
-        <tr>
-          <td>${o.id}</td>
-          <td>${o.product}</td>
-          <td>${o.price} ₽</td>
-          <td>${o.name}</td>
-          <td>${o.phone}</td>
-          <td>${new Date(o.date).toLocaleString()}</td>
-        </tr>
-      `).join("");
+async function login() {
+  const login = document.getElementById("login").value;
+  const password = document.getElementById("password").value;
+  const errorEl = document.getElementById("loginError");
+
+  try {
+    const res = await fetch(BACKEND_URL + "/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ login, password })
+    });
+
+    if (!res.ok) {
+      throw new Error("Неверный логин или пароль");
     }
 
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("ordersContainer").style.display = "block";
     loadOrders();
-  </script>
+    setInterval(loadOrders, 5000); // обновляем каждые 5 секунд
+
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+}
+
+async function loadOrders() {
+  const res = await fetch(BACKEND_URL + "/orders");
+  const orders = await res.json();
+  const tbody = document.getElementById("ordersTable");
+  tbody.innerHTML = orders.map(o => `
+    <tr>
+      <td>${o.id}</td>
+      <td>${o.product}</td>
+      <td>${o.price} ₽</td>
+      <td>${o.name}</td>
+      <td>${o.phone}</td>
+      <td>${new Date(o.date).toLocaleString()}</td>
+    </tr>
+  `).join("");
+}
+</script>
+
 </body>
 </html>
