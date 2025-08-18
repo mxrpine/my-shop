@@ -12,18 +12,31 @@ app.use(express.json());
 const productsPath = path.join(__dirname, "db.json");
 let products = JSON.parse(fs.readFileSync(productsPath, "utf-8"));
 
+// Заказы в памяти
+let orders = [];
+
+// Логин для админки (хранится на сервере)
+const ADMIN_LOGIN = process.env.ADMIN_LOGIN || "admin";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "1234";
+
 // Список товаров
 app.get("/products", (req, res) => {
   res.json(products);
 });
 
-// Хранение заказов в памяти
-let orders = [];
+// Проверка логина
+app.post("/admin/login", (req, res) => {
+  const { login, password } = req.body;
+  if (login === ADMIN_LOGIN && password === ADMIN_PASSWORD) {
+    res.json({ status: "ok" });
+  } else {
+    res.status(401).json({ status: "error", message: "Неверный логин или пароль" });
+  }
+});
 
-// Оформление заказа (с id и датой)
+// Оформление заказа
 app.post("/order", (req, res) => {
   const order = req.body || {};
-
   const newOrder = {
     id: orders.length + 1,
     product: order.product,
@@ -32,18 +45,16 @@ app.post("/order", (req, res) => {
     phone: order.phone,
     date: new Date()
   };
-
   orders.push(newOrder);
   console.log("Новый заказ:", newOrder);
-
-  res.json({ status: "ok", message: "Заказ принят! Мы свяжемся с вами." });
+  res.json({ status: "ok", message: "Заказ принят!" });
 });
 
-// Роут для админки — получить все заказы
+// Получение всех заказов
 app.get("/orders", (req, res) => {
   res.json(orders);
 });
 
-// Railway передаёт порт через переменную окружения
+// Запуск сервера
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Сервер запущен на порту ${PORT}`));
