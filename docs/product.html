@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Товар</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f6f7fb; margin: 0; padding: 20px; color: #222; }
+    .back-link { text-decoration: none; color: #00aaff; font-size: 14px; }
+    .product-card { display: flex; gap: 30px; margin-top: 20px; flex-wrap: wrap; }
+    .left { flex: 1 1 360px; }
+    .right { flex: 1 1 360px; display: flex; flex-direction: column; }
+    .main-img { max-width: 100%; border-radius: 12px; border: 1px solid #e5e7eb; }
+    .thumbnails { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+    .thumbnails img { width: 84px; height: 84px; object-fit: cover; cursor: pointer; border-radius: 8px; border: 1px solid #ddd; }
+    .price { font-size: 20px; font-weight: 700; margin: 10px 0; }
+    select { margin: 10px 0; padding: 6px 10px; border-radius: 8px; border: 1px solid #ddd; }
+    button { padding: 10px 20px; border: none; border-radius: 20px; background: #00aaff; color: white; cursor: pointer; margin-top: 10px; align-self: flex-start; }
+    button:hover { background: #0088cc; }
+    .desc { margin-top: 15px; font-size: 14px; line-height: 1.55; color: #555; white-space: pre-line; }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">← Назад</a>
+
+  <div class="product-card" id="productView" hidden>
+    <div class="left">
+      <img id="mainImage" src="" alt="Товар" class="main-img">
+      <div id="thumbnails" class="thumbnails"></div>
+    </div>
+    <div class="right">
+      <h1 id="productName"></h1>
+      <p id="productPrice" class="price"></p>
+
+      <label for="size">Размер:</label>
+      <select id="size">
+        <option value="S">S</option>
+        <option value="M" selected>M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+      </select>
+
+      <button id="addToCartBtn">Добавить в корзину</button>
+
+      <p id="productDesc" class="desc"></p>
+    </div>
+  </div>
+
+  <p id="status" style="padding:16px;"></p>
+
+  <script>
+    const BACKEND_URL = "https://my-shop-production.up.railway.app";
+
+    function changeImage(src) {
+      const img = document.getElementById("mainImage");
+      img.src = src;
+    }
+
+    function renderProduct(product) {
+      const nameEl = document.getElementById("productName");
+      const priceEl = document.getElementById("productPrice");
+      const descEl = document.getElementById("productDesc");
+      const mainImage = document.getElementById("mainImage");
+      const thumbs = document.getElementById("thumbnails");
+
+      nameEl.textContent = product.name || "Товар";
+      priceEl.textContent = (product.price != null ? product.price : "") + (product.price != null ? " ₽" : "");
+      descEl.textContent = product.description || "";
+
+      const images = Array.isArray(product.images) && product.images.length ? product.images
+                     : (product.image ? [product.image] : []);
+      if (images.length) {
+        mainImage.src = images[0];
+        thumbs.innerHTML = images.map(src => `<img src="${src}" data-src="${src}" alt="вариант">`).join("");
+        thumbs.onclick = (e) => {
+          const t = e.target;
+          if (t.tagName === "IMG" && t.dataset.src) changeImage(t.dataset.src);
+        };
+      } else {
+        mainImage.removeAttribute("src");
+      }
+
+      document.getElementById("productView").hidden = false;
+    }
+
+    async function loadProduct() {
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
+      const status = document.getElementById("status");
+
+      // 1) пробуем из localStorage
+      let product = null;
+      try {
+        const raw = localStorage.getItem("selectedProduct");
+        if (raw) {
+          const p = JSON.parse(raw);
+          if (!id || String(p.id) === String(id)) product = p;
+        }
+      } catch (e) {}
+
+      // 2) если не нашли — пробуем добрать по API /products/:id
+      if (!product && id) {
+        try {
+          const res = await fetch(`${BACKEND_URL}/products/${encodeURIComponent(id)}`);
+          if (res.ok) product = await res.json();
+        } catch (e) {
+          console.warn("Не удалось загрузить товар по API:", e);
+        }
+      }
+
+      if (!product) {
+        status.textContent = "Товар не найден.";
+        return;
+      }
+
+      // на всякий случай обновим localStorage актуальной версией
+      try { localStorage.setItem("selectedProduct", JSON.stringify(product)); } catch {}
+
+      renderProduct(product);
+
+      // обработчик корзины
+      document.getElementById("addToCartBtn").onclick = () => {
+        const size = document.getElementById("size").value;
+        const item = {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          size,
+          qty: 1,
+          image: product.image || (Array.isArray(product.images) ? product.images[0] : undefined),
+        };
+        let cart = [];
+        try { cart = JSON.parse(localStorage.getItem("cart") || "[]"); } catch {}
+        cart.push(item);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        alert("Товар добавлен в корзину");
+      };
+    }
+
+    loadProduct();
+  </script>
+</body>
+</html>
