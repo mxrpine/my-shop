@@ -3,46 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Outcast</title>
+  <title>Магазин</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
-    .card {
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-      background: #fff;
-    }
-    .card img {
-      max-width: 100%;
-      border-radius: 8px;
-    }
-    .price {
-      font-weight: bold;
-      margin: 10px 0;
-    }
-    button {
-      background: #2d89ef;
-      color: #fff;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #1a5fbe;
-    }
-  </style>
 </head>
 <body>
   <header>
-    <h1>Outcast</h1>
-    <p class="hint">Тестовый магазин на JS. Заказы идут на backend.</p>
+    <h1>Магазин</h1>
   </header>
 
   <main>
@@ -50,25 +16,18 @@
   </main>
 
   <footer>
-    <small>Прототип магазина на JS. Заказы отправляются на backend.</small>
+    <small>Прототип магазина. Заказы отправляются на backend.</small>
   </footer>
 
   <script>
-    const BACKEND_URL = "https://my-shop-production.up.railway.app";
+    const BACKEND_URL = "https://my-shop-production.up.railway.app"; // замени на свой
 
-    // Продукты можно хранить на backend (через API),
-    // но для примера добавим прямо тут:
-    const products = [
-      { id: 1, name: "Футболка", price: 1500, image: "images/tiska.jpg" },
-      { id: 2, name: "Ноутбук", price: 55000, image: "images/laptop.jpg" },
-      { id: 3, name: "Наушники", price: 3500, image: "images/headphones.jpg" }
-    ];
-
-    function loadProducts() {
+    async function loadProducts() {
+      const res = await fetch(BACKEND_URL + "/products");
+      const products = await res.json();
       const container = document.getElementById("products");
       container.innerHTML = products.map(p => `
         <div class="card">
-          <img src="${p.image}" alt="${p.name}">
           <h3>${p.name}</h3>
           <p class="price">${p.price} ₽</p>
           <button onclick='order(${JSON.stringify(p)})'>Купить</button>
@@ -76,18 +35,14 @@
       `).join("");
     }
 
-    async function order(product) {
-      const name = prompt("Ваше имя?");
-      const phone = prompt("Ваш телефон?");
-      const adress = prompt("Ваш адрес?");
-      if (!name || !phone || !adress) return alert("Нужно указать имя, адресс и телефон.");
-      const res = await fetch(BACKEND_URL + "/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: product.id, product: product.name, price: product.price, name, phone, adress })
-      });
-      const data = await res.json();
-      alert(data.message || "Готово");
+    function order(product) {
+      const query = new URLSearchParams({
+        id: product.id,
+        name: product.name,
+        price: product.price
+      }).toString();
+
+      window.location.href = "checkout.html?" + query;
     }
 
     loadProducts();
