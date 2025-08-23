@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Корзина</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f6f7fb; margin: 0; padding: 20px; color: #222; }
+    h1 { text-align: center; margin-bottom: 20px; }
+    .cart-container { max-width: 900px; margin: auto; background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .cart-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
+    .cart-item:last-child { border-bottom: none; }
+    .cart-item img { width: 80px; height: auto; border-radius: 8px; border: 1px solid #ddd; }
+    .cart-details { flex: 1; margin-left: 15px; }
+    .cart-name { font-size: 16px; font-weight: 600; }
+    .cart-size { font-size: 14px; color: #555; margin-top: 4px; }
+    .cart-price { font-weight: bold; }
+    .cart-controls { display: flex; align-items: center; gap: 10px; }
+    .qty-input { width: 50px; text-align: center; padding: 4px; }
+    button { padding: 8px 14px; border: none; border-radius: 8px; cursor: pointer; }
+    .remove-btn { background: #ff4444; color: #fff; }
+    .remove-btn:hover { background: #cc0000; }
+    .checkout-btn { background: #00aaff; color: #fff; margin-top: 20px; }
+    .checkout-btn:hover { background: #0088cc; }
+    .summary { text-align: right; font-size: 18px; font-weight: bold; margin-top: 20px; }
+    .empty { text-align: center; color: #666; padding: 40px; }
+  </style>
+</head>
+<body>
+  <h1>Корзина</h1>
+  <div class="cart-container" id="cartContainer">
+    <p class="empty">Корзина пуста</p>
+  </div>
+
+  <script>
+    function loadCart() {
+      let cart = [];
+      try { cart = JSON.parse(localStorage.getItem("cart") || "[]"); } catch {}
+      const container = document.getElementById("cartContainer");
+      if (!cart.length) {
+        container.innerHTML = '<p class="empty">Корзина пуста</p>';
+        return;
+      }
+
+      let total = 0;
+      container.innerHTML = cart.map((item, index) => {
+        const sum = item.price * item.qty;
+        total += sum;
+        return `
+          <div class="cart-item">
+            <img src="${item.image || ''}" alt="${item.name}">
+            <div class="cart-details">
+              <div class="cart-name">${item.name}</div>
+              <div class="cart-size">Размер: ${item.size || '-'}</div>
+              <div class="cart-price">${item.price} ₽</div>
+            </div>
+            <div class="cart-controls">
+              <input type="number" class="qty-input" min="1" value="${item.qty}" onchange="updateQty(${index}, this.value)">
+              <button class="remove-btn" onclick="removeItem(${index})">Удалить</button>
+            </div>
+          </div>
+        `;
+      }).join("") + `
+        <div class="summary">Итого: ${total} ₽</div>
+        <button class="checkout-btn" onclick="checkout()">Оформить заказ</button>
+      `;
+    }
+
+    function updateQty(index, value) {
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const qty = parseInt(value);
+      if (qty > 0) {
+        cart[index].qty = qty;
+        localStorage.setItem("cart", JSON.stringify(cart));
+      }
+      loadCart();
+    }
+
+    function removeItem(index) {
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      loadCart();
+    }
+
+    function checkout() {
+      alert("Оформление заказа пока прототип 🙂");
+      // здесь можно сделать переход на checkout.html
+    }
+
+    loadCart();
+  </script>
+</body>
+</html>
