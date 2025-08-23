@@ -1,18 +1,20 @@
 [
   {
     "id": 1,
-    "name": "Футболка",
-    "price": 3500
-    "image": "images/tishka.jpg"
+    "name": "Кроссовки",
+    "price": 3500,
+    "image": "images/shoes.jpg"
   },
   {
     "id": 2,
     "name": "Футболка",
-    "price": 1200
+    "price": 1500,
+    "image": "images/tishka.jpg"
   },
   {
     "id": 3,
-    "name": "Рюкзак",
-    "price": 2500
+    "name": "Кепка",
+    "price": 900,
+    "image": "images/cap.jpg"
   }
 ]
