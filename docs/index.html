@@ -13,21 +13,54 @@
       gap: 20px;
     }
     .card {
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 8px;
-      text-align: center;
+      /* Frame 4 */
+
+position: relative;
+width: 400px;
+height: 725px;
+
+
     }
     .product-image {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      display: block;
+      /* Image */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: 0px;
+
+width: 368px;
+height: 247px;
+
+background: url(tishka.jpg);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
     }
     .price {
-      font-weight: bold;
-      margin-bottom: 10px;
+      /* Text Strong */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px;
+
+width: 77px;
+height: 22px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
     }
     button {
       /* Frame 1 */
