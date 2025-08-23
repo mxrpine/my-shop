@@ -21,22 +21,31 @@
 
   <script>
     const BACKEND_URL = "https://my-shop-production.up.railway.app"; // замени на свой
+    let products = [];
 
     async function loadProducts() {
-      const res = await fetch(BACKEND_URL + "/products");
-      const products = await res.json();
-      const container = document.getElementById("products");
-     container.innerHTML = products.map(p => `
-  <div class="card">
-    <h3>${p.name}</h3>
-    <p class="price">${p.price} ₽</p>
-    <button onclick='order(${JSON.stringify(p)})'>Купить</button>
-  </div>
-`).join("");
+      try {
+        const res = await fetch(BACKEND_URL + "/products");
+        products = await res.json();
 
+        const container = document.getElementById("products");
+        container.innerHTML = products.map(p => `
+          <div class="card">
+            <h3>${p.name}</h3>
+            <p class="price">${p.price} ₽</p>
+            <button onclick="order(${p.id})">Купить</button>
+          </div>
+        `).join("");
+      } catch (err) {
+        console.error("Ошибка загрузки товаров:", err);
+        document.getElementById("products").innerHTML = "<p>Не удалось загрузить товары.</p>";
+      }
+    }
 
-      
-    function order(product) {
+    function order(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return alert("Ошибка: товар не найден.");
+
       const query = new URLSearchParams({
         id: product.id,
         name: product.name,
