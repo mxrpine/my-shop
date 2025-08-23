@@ -13,54 +13,21 @@
       gap: 20px;
     }
     .card {
-      /* Frame 4 */
-
-position: relative;
-width: 400px;
-height: 725px;
-
-
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
     }
     .product-image {
-      /* Image */
-
-/* Auto layout */
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-padding: 0px;
-
-width: 368px;
-height: 247px;
-
-background: url(tishka.jpg);
-
-/* Inside auto layout */
-flex: none;
-order: 0;
-align-self: stretch;
-flex-grow: 0;
-
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: block;
     }
     .price {
-      /* Text Strong */
-
-/* Auto layout */
-display: flex;
-flex-direction: row;
-align-items: flex-start;
-padding: 0px;
-
-width: 77px;
-height: 22px;
-
-
-/* Inside auto layout */
-flex: none;
-order: 1;
-flex-grow: 0;
-
+      font-weight: bold;
+      margin-bottom: 10px;
     }
     button {
       /* Frame 1 */
@@ -103,13 +70,8 @@ flex-grow: 0;
 
     }
     button:hover {
-      transform: translateY(-2px);
-  box-shadow: 0px 6px 8px rgba(0,0,0,0.15);
+      background: darkgreen;
     }
-    button:active {
-  transform: translateY(0);
-  box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-}
   </style>
 </head>
 <body>
