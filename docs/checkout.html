@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Оформление заказа</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    form { max-width: 400px; margin: auto; display: flex; flex-direction: column; gap: 12px; }
+    input, button { padding: 10px; font-size: 16px; }
+    button { background: green; color: white; border: none; cursor: pointer; }
+    button:hover { background: darkgreen; }
+  </style>
+</head>
+<body>
+  <h1>Оформление заказа</h1>
+  <form id="orderForm">
+    <input type="hidden" id="productId" />
+    <input type="hidden" id="productName" />
+    <input type="hidden" id="productPrice" />
+
+    <label>Имя: <input type="text" id="name" required /></label>
+    <label>Телефон: <input type="tel" id="phone" required /></label>
+    <label>Адрес: <input type="text" id="address" required /></label>
+    <button type="submit">Отправить заказ</button>
+  </form>
+
+  <script>
+    const BACKEND_URL = "https://my-shop-production.up.railway.app"; // замени на свой
+
+    const urlParams = new URLSearchParams(window.location.search);
+    document.getElementById("productId").value = urlParams.get("id");
+    document.getElementById("productName").value = urlParams.get("name");
+    document.getElementById("productPrice").value = urlParams.get("price");
+
+    document.getElementById("orderForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const order = {
+        productId: document.getElementById("productId").value,
+        product: document.getElementById("productName").value,
+        price: document.getElementById("productPrice").value,
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        address: document.getElementById("address").value,
+      };
+
+      const res = await fetch(BACKEND_URL + "/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(order)
+      });
+
+      const data = await res.json();
+      alert(data.message || "Заказ оформлен!");
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>
