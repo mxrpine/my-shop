@@ -3,6 +3,7 @@
     "id": 1,
     "name": "Футболка",
     "price": 1500,
+    "description": "I hope one day the pink sakura will shine in my soul...",
     "image": "images/tiska.jpg"
   },
   {
