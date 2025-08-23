@@ -1,8 +1,9 @@
 [
   {
     "id": 1,
-    "name": "Кроссовки",
+    "name": "Футболка",
     "price": 3500
+    "image": "images/tishka.jpg"
   },
   {
     "id": 2,
