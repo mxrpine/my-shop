@@ -11,3 +11,56 @@ main { padding: 20px; }
 button { padding: 10px 14px; border-radius: 12px; border: 0; cursor: pointer; background: #3b82f6; color: #fff; font-weight: 600; }
 button:hover { filter: brightness(0.95); }
 footer { padding: 12px 20px 24px; color: #666; }
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(18, 18, 18, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 400px;
+}
+
+.product-image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: contain; /* чтобы не растягивалось */
+}
+
+.card h3 {
+  margin: 16px 0 4px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.price {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.desc {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #666;
+  margin: 0 0 16px;
+}
+
+button {
+  padding: 12px 20px;
+  border-radius: 20px;
+  border: none;
+  background: #00A2DD;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.15);
+}
