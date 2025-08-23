@@ -5,6 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Магазин</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Простейшие стили для карточек и картинок */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .product-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .price {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      background: green;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: darkgreen;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -31,6 +67,7 @@
         const container = document.getElementById("products");
         container.innerHTML = products.map(p => `
           <div class="card">
+            <img src="${p.image}" alt="${p.name}" class="product-image" />
             <h3>${p.name}</h3>
             <p class="price">${p.price} ₽</p>
             <button onclick="order(${p.id})">Купить</button>
