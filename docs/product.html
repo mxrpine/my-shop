@@ -7,6 +7,33 @@
   <style>
     body { font-family: 'Inter', sans-serif; background: #f6f7fb; margin: 0; padding: 20px; color: #222; }
     .back-link { text-decoration: none; color: #00aaff; font-size: 14px; }
+
+    /* Иконка корзины */
+    .cart-link {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      text-decoration: none;
+      color: #222;
+    }
+    .cart-link svg {
+      width: 32px;
+      height: 32px;
+      stroke: #00aaff;
+    }
+    .cart-link:hover svg { stroke: #0088cc; }
+    .cart-count {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #ff4444;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 50%;
+      padding: 2px 6px;
+    }
+
     .product-card { display: flex; gap: 30px; margin-top: 20px; flex-wrap: wrap; }
     .left { flex: 1 1 360px; }
     .right { flex: 1 1 360px; display: flex; flex-direction: column; }
@@ -19,9 +46,18 @@
     button:hover { background: #0088cc; }
     .desc { margin-top: 15px; font-size: 14px; line-height: 1.55; color: #555; white-space: pre-line; }
   </style>
+
+  <!-- подключаем lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
   <a href="index.html" class="back-link">← Назад</a>
+
+  <!-- иконка корзины -->
+  <a href="cart.html" class="cart-link">
+    <i data-lucide="shopping-cart"></i>
+    <span id="cartCount" class="cart-count">0</span>
+  </a>
 
   <div class="product-card" id="productView" hidden>
     <div class="left">
@@ -52,8 +88,7 @@
     const BACKEND_URL = "https://my-shop-production.up.railway.app";
 
     function changeImage(src) {
-      const img = document.getElementById("mainImage");
-      img.src = src;
+      document.getElementById("mainImage").src = src;
     }
 
     function renderProduct(product) {
@@ -88,7 +123,6 @@
       const id = params.get("id");
       const status = document.getElementById("status");
 
-      // 1) пробуем из localStorage
       let product = null;
       try {
         const raw = localStorage.getItem("selectedProduct");
@@ -98,7 +132,6 @@
         }
       } catch (e) {}
 
-      // 2) если не нашли — пробуем добрать по API /products/:id
       if (!product && id) {
         try {
           const res = await fetch(`${BACKEND_URL}/products/${encodeURIComponent(id)}`);
@@ -113,12 +146,10 @@
         return;
       }
 
-      // на всякий случай обновим localStorage актуальной версией
       try { localStorage.setItem("selectedProduct", JSON.stringify(product)); } catch {}
 
       renderProduct(product);
 
-      // обработчик корзины
       document.getElementById("addToCartBtn").onclick = () => {
         const size = document.getElementById("size").value;
         const item = {
@@ -133,10 +164,19 @@
         try { cart = JSON.parse(localStorage.getItem("cart") || "[]"); } catch {}
         cart.push(item);
         localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartCount();
         alert("Товар добавлен в корзину");
       };
     }
 
+    function updateCartCount() {
+      let cart = [];
+      try { cart = JSON.parse(localStorage.getItem("cart") || "[]"); } catch {}
+      document.getElementById("cartCount").textContent = cart.length;
+    }
+
+    lucide.createIcons();
+    updateCartCount();
     loadProduct();
   </script>
 </body>
