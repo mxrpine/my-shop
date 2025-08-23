@@ -5,15 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Админка магазина</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
-    th { background: #f4f4f4; }
+    body { font-family: Arial, sans-serif; padding: 20px; background:#f6f7fb; color:#222; }
+    h1 { margin: 0 0 10px; }
+    .toolbar { display:flex; gap:10px; align-items:center; }
+    button { padding:8px 12px; border:none; border-radius:8px; background:#00aaff; color:#fff; cursor:pointer; }
+    button:hover { background:#0088cc; }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; background:#fff; border-radius:12px; overflow:hidden; }
+    th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; vertical-align: top; }
+    th { background: #f4f6f9; font-weight:700; }
     ul { margin: 0; padding-left: 18px; }
+    .muted { color:#666; }
+    .error { color:#b00020; margin-top:10px; }
+    details summary { cursor:pointer; color:#00aaff; }
   </style>
 </head>
 <body>
   <h1>Админка</h1>
+  <div class="toolbar">
+    <button id="refreshBtn">Обновить</button>
+    <label><input type="checkbox" id="autoRefresh" checked> автообновление (5с)</label>
+  </div>
+
   <table>
     <thead>
       <tr>
@@ -26,49 +38,185 @@
         <th>Дата</th>
       </tr>
     </thead>
-    <tbody id="ordersTable"></tbody>
+    <tbody id="ordersTable">
+      <tr><td colspan="7" class="muted">Загружаем заказы…</td></tr>
+    </tbody>
   </table>
 
+  <p id="err" class="error"></p>
+
   <script>
-    const BACKEND_URL = "https://my-shop-production.up.railway.app"; // замените на ваш URL
+    const BACKEND_URL = "https://my-shop-production.up.railway.app"; // ваш URL
+    const ORDERS_URL = BACKEND_URL + "/orders";
 
+    // --- helpers ---
+    const fmt = (n) => {
+      if (isNaN(n)) return "—";
+      try { return new Intl.NumberFormat("ru-RU").format(n) + " ₽"; }
+      catch { return n + " ₽"; }
+    };
+
+    const toNumber = (v) => {
+      if (typeof v === "number") return v;
+      if (!v) return NaN;
+      // "4 000 р.", "6,500", "6500.00" → 6500
+      const cleaned = String(v).replace(/[^\d.,-]/g, "").replace(/\s+/g, "");
+      // если есть и запятая и точка — считаем, что точка разделяет тысячи, а запятая — десятые
+      if (cleaned.includes(",") && cleaned.includes(".")) {
+        const lastComma = cleaned.lastIndexOf(",");
+        const lastDot = cleaned.lastIndexOf(".");
+        const decimalSep = lastComma > lastDot ? "," : ".";
+        const normalized = cleaned
+          .replace(/[.,](?=.*[.,])/g, "") // все, кроме последнего разделителя, убираем
+          .replace(decimalSep, ".");
+        return parseFloat(normalized);
+      }
+      // если только запятая — делаем её десятичной
+      if (cleaned.includes(",") && !cleaned.includes(".")) {
+        return parseFloat(cleaned.replace(/\./g, "").replace(",", "."));
+      }
+      // иначе просто убираем пробелы и запятые тысяч
+      return parseFloat(cleaned.replace(/,/g, ""));
+    };
+
+    const pick = (obj, keys) => {
+      for (const k of keys) {
+        if (obj && obj[k] != null) return obj[k];
+      }
+      return undefined;
+    };
+
+    const normalizeItem = (it) => {
+      // Разные возможные формы айтема
+      const name = pick(it, ["name","title","productName"]) || (it.product && it.product.name) || "Товар";
+      const priceRaw = pick(it, ["price","amount","cost","unitPrice","sum"]);
+      const qty = pick(it, ["qty","quantity","count"]) ?? 1;
+      const size = pick(it, ["size","variant","sku","option"]) || "-";
+      const image = pick(it, ["image","img","photo"]) || (it.product && it.product.image);
+      const price = toNumber(priceRaw);
+      const qtyNum = Number(qty) || 1;
+      return { name, price, qty: qtyNum, size, image };
+    };
+
+    const normalizeOrder = (o) => {
+      // Общие поля заказа
+      const id = pick(o, ["id","orderId","_id","uuid","number"]) ?? "—";
+      const name = pick(o, ["name","customerName","clientName"]) || (o.customer && o.customer.name) || "";
+      const phone = pick(o, ["phone","phoneNumber"]) || (o.customer && o.customer.phone) || "";
+      const address = pick(o, ["address","shippingAddress","deliveryAddress"]) ||
+                      [o.city, o.street, o.house, o.apartment].filter(Boolean).join(", ");
+      const dateRaw = pick(o, ["date","createdAt","created_at","timestamp","created"]);
+
+      // Вытаскиваем товары из наиболее вероятных полей
+      let items = [];
+      if (Array.isArray(o.items)) items = o.items;
+      else if (Array.isArray(o.cart)) items = o.cart;
+      else if (Array.isArray(o.products)) items = o.products;
+      else if (o.product || o.title || o.productName || o.price) {
+        // fallback: одиночный товар прямо в заказе
+        items = [{
+          name: pick(o, ["product","title","productName"]) || "Товар",
+          price: pick(o, ["price","amount"]),
+          qty: pick(o, ["qty","quantity"]) || 1,
+          size: pick(o, ["size","variant"])
+        }];
+      }
+
+      // Нормализуем айтемы
+      const normItems = items.map(it => normalizeItem(it));
+      // Если айтемы пустые, последняя попытка — может лежит внутри объекта product
+      if (!normItems.length && o.product && typeof o.product === "object") {
+        normItems.push(normalizeItem(o.product));
+      }
+
+      const total = normItems.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.qty) || 1), 0);
+
+      return {
+        id, customerName: name, phone, address,
+        date: dateRaw ? new Date(dateRaw) : null,
+        items: normItems, total
+      };
+    };
+
+    const ensureArray = (data) => {
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.orders)) return data.orders;
+      if (data && Array.isArray(data.data)) return data.data;
+      if (data && data.data && Array.isArray(data.data.orders)) return data.data.orders;
+      return [];
+    };
+
+    // --- render ---
     async function loadOrders() {
+      const tbody = document.getElementById("ordersTable");
+      const err = document.getElementById("err");
+      err.textContent = "";
+      tbody.innerHTML = `<tr><td colspan="7" class="muted">Загружаем…</td></tr>`;
+
       try {
-        const res = await fetch(BACKEND_URL + "/orders");
-        const orders = await res.json();
-        const tbody = document.getElementById("ordersTable");
+        const res = await fetch(ORDERS_URL, { headers: { "Accept": "application/json" } });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const rawOrders = ensureArray(data);
 
-        tbody.innerHTML = orders.map(o => {
-          let itemsList = "";
-          let total = 0;
+        if (!rawOrders.length) {
+          tbody.innerHTML = `<tr><td colspan="7" class="muted">Заказов пока нет</td></tr>`;
+          return;
+        }
 
-          if (Array.isArray(o.items)) {
-            itemsList = "<ul>" + o.items.map(it => {
-              total += it.price * (it.qty || 1);
-              return `<li>${it.name} (${it.size || "-"}) × ${it.qty || 1} — ${it.price} ₽</li>`;
-            }).join("") + "</ul>";
-          }
+        const rows = rawOrders.map(o => {
+          const n = normalizeOrder(o);
+
+          const itemsHtml = n.items.length
+            ? `<ul>${n.items.map(it => `
+                <li>${it.name} (${it.size}) × ${it.qty} — ${fmt(it.price)}</li>
+              `).join("")}</ul>`
+            : `<span class="muted">—</span>`;
+
+          const dateText = n.date ? n.date.toLocaleString("ru-RU") : "—";
+
+          // Вставим debug (скрытый) на случай странного формата
+          const debug = `<details><summary>raw</summary><pre style="white-space:pre-wrap;font-size:12px;">${escapeHtml(JSON.stringify(o, null, 2))}</pre></details>`;
 
           return `
             <tr>
-              <td>${o.id}</td>
-              <td>${itemsList}</td>
-              <td>${total} ₽</td>
-              <td>${o.name}</td>
-              <td>${o.phone}</td>
-              <td>${o.address || ""}</td>
-              <td>${new Date(o.date).toLocaleString()}</td>
+              <td>${n.id}${debug}</td>
+              <td>${itemsHtml}</td>
+              <td><b>${fmt(n.total)}</b></td>
+              <td>${n.customerName || "—"}</td>
+              <td>${n.phone || "—"}</td>
+              <td>${n.address || "—"}</td>
+              <td>${dateText}</td>
             </tr>
           `;
         }).join("");
-      } catch (err) {
-        console.error("Ошибка при загрузке заказов:", err);
+
+        tbody.innerHTML = rows;
+      } catch (e) {
+        console.error(e);
+        err.textContent = "Ошибка при загрузке заказов: " + e.message + ". Проверьте CORS и формат ответа /orders.";
+        tbody.innerHTML = `<tr><td colspan="7" class="muted">Не удалось загрузить данные</td></tr>`;
       }
     }
 
-    // Обновляем заказы каждые 5 секунд
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // --- wiring ---
+    document.getElementById("refreshBtn").addEventListener("click", loadOrders);
+    let timer = setInterval(loadOrders, 5000);
+    document.getElementById("autoRefresh").addEventListener("change", (e) => {
+      if (e.target.checked) timer = setInterval(loadOrders, 5000);
+      else clearInterval(timer);
+    });
+
     loadOrders();
-    setInterval(loadOrders, 5000);
   </script>
 </body>
 </html>
