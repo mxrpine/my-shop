@@ -30,12 +30,44 @@
       margin-bottom: 10px;
     }
     button {
-      padding: 10px 15px;
-      border: none;
-      background: green;
-      color: white;
-      cursor: pointer;
-      border-radius: 5px;
+      /* Frame 1 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 16px 32px;
+gap: 10px;
+
+position: relative;
+width: 105px;
+height: 47px;
+
+background: #00A2DD;
+border-radius: 20px;
+
+
+/* Купить */
+
+width: 41px;
+height: 15px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 15px;
+/* identical to box height */
+
+color: #FFFFFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
     }
     button:hover {
       background: darkgreen;
