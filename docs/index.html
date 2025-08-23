@@ -28,12 +28,12 @@
       const container = document.getElementById("products");
      container.innerHTML = products.map(p => `
   <div class="card">
-    <img src="${p.image}" alt="${p.name}" class="product-image" />
     <h3>${p.name}</h3>
     <p class="price">${p.price} ₽</p>
     <button onclick='order(${JSON.stringify(p)})'>Купить</button>
   </div>
 `).join("");
+
 
       
     function order(product) {
