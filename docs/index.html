@@ -6,39 +6,92 @@
   <title>Магазин</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Простейшие стили для карточек и картинок */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f6f7fb;
+      margin: 0;
+      padding: 0;
+      color: #222;
     }
-    .card {
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 8px;
+
+    header {
+      padding: 24px;
       text-align: center;
     }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+      justify-items: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(18, 18, 18, 0.06);
+      width: 400px;
+      height: 725px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 24px;
+    }
+
     .product-image {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      margin-bottom: 10px;
+      width: 368px;
+      height: 247px;
+      object-fit: contain;
+      margin: 0 auto 20px auto;
       display: block;
     }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
     .price {
-      font-weight: bold;
-      margin-bottom: 10px;
+      font-weight: 700;
+      margin: 0 0 12px;
     }
+
+    .description {
+      font-size: 14px;
+      line-height: 1.4;
+      color: #666;
+      margin-bottom: auto;
+    }
+
     button {
-      padding: 10px 15px;
+      padding: 16px 32px;
+      background: #00A2DD;
+      border-radius: 20px;
       border: none;
-      background: green;
-      color: white;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
       cursor: pointer;
-      border-radius: 5px;
+      transition: all 0.2s ease;
     }
+
     button:hover {
-      background: darkgreen;
+      transform: translateY(-2px);
+      box-shadow: 0px 6px 8px rgba(0,0,0,0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+    }
+
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 12px;
+      color: #666;
     }
   </style>
 </head>
@@ -70,6 +123,7 @@
             <img src="${p.image}" alt="${p.name}" class="product-image" />
             <h3>${p.name}</h3>
             <p class="price">${p.price} ₽</p>
+            <p class="description">${p.description || ""}</p>
             <button onclick="order(${p.id})">Купить</button>
           </div>
         `).join("");
