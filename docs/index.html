@@ -27,53 +27,53 @@
       padding: 20px;
     }
 
- .card {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 400px;
-  height: 700px; /* фиксированная высота */
-  box-sizing: border-box;
-}
-.card img {
-  max-width: 100%;
-  height: auto;
-  margin-bottom: 16px;
-}
-.card h3 {
-  font-size: 18px;
-  margin: 8px 0;
-}
-.card .price {
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-.card .description {
-  font-size: 14px;
-  line-height: 1.4;
-  color: #666;
-  flex-grow: 1;        /* текст занимает свободное место */
-  overflow-y: auto;    /* если текста больше чем помещается — появится скролл */
-  margin-bottom: 16px;
-}
-.card button {
-  align-self: flex-start;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 20px;
-  background: #00aaff;
-  color: white;
-  cursor: pointer;
-}
-.card button:hover {
-  background: #0088cc;
-}
-
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 400px;
+      height: 700px;
+      box-sizing: border-box;
     }
+    .card img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 16px;
+    }
+    .card h3 {
+      font-size: 18px;
+      margin: 8px 0;
+    }
+    .card .price {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .card .description {
+      font-size: 14px;
+      line-height: 1.4;
+      color: #666;
+      flex-grow: 1;
+      overflow-y: auto;
+      margin-bottom: 16px;
+    }
+    .card button {
+      align-self: flex-start;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      background: #00aaff;
+      color: white;
+      cursor: pointer;
+    }
+    .card button:hover {
+      background: #0088cc;
+    }
+
+    /* убрал лишнюю } здесь */
 
     button:active {
       transform: translateY(0);
@@ -102,7 +102,7 @@
   </footer>
 
   <script>
-    const BACKEND_URL = "https://my-shop-production.up.railway.app"; // замени на свой
+    const BACKEND_URL = "https://my-shop-production.up.railway.app";
     let products = [];
 
     async function loadProducts() {
@@ -117,7 +117,7 @@
             <h3>${p.name}</h3>
             <p class="price">${p.price} ₽</p>
             <p class="description">${p.description || ""}</p>
-            <button onclick="order(${p.id})">Купить</button>
+            <button onclick="openProduct(${p.id})">Купить</button>   <!-- ★ -->
           </div>
         `).join("");
       } catch (err) {
@@ -126,6 +126,20 @@
       }
     }
 
+    // ★ открываем карточку товара
+    function openProduct(productId) {
+      const product = products.find(p => String(p.id) === String(productId));
+      if (!product) return alert("Ошибка: товар не найден.");
+
+      try {
+        localStorage.setItem("selectedProduct", JSON.stringify(product));
+      } catch (e) {
+        console.warn("Не удалось сохранить товар в localStorage:", e);
+      }
+      window.location.href = "product.html?id=" + encodeURIComponent(productId);
+    }
+
+    // оставил order() на месте, если вдруг понадобится прежний поток на checkout
     function order(productId) {
       const product = products.find(p => p.id === productId);
       if (!product) return alert("Ошибка: товар не найден.");
