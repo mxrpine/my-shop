@@ -7,8 +7,9 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
     th { background: #f4f4f4; }
+    ul { margin: 0; padding-left: 18px; }
   </style>
 </head>
 <body>
@@ -17,8 +18,8 @@
     <thead>
       <tr>
         <th>ID</th>
-        <th>Товар</th>
-        <th>Цена</th>
+        <th>Товары</th>
+        <th>Итого</th>
         <th>Имя</th>
         <th>Телефон</th>
         <th>Адрес</th>
@@ -37,17 +38,29 @@
         const orders = await res.json();
         const tbody = document.getElementById("ordersTable");
 
-        tbody.innerHTML = orders.map(o => `
-          <tr>
-            <td>${o.id}</td>
-            <td>${o.product}</td>
-            <td>${o.price} ₽</td>
-            <td>${o.name}</td>
-            <td>${o.phone}</td>
-            <td>${o.address || ""}</td>
-            <td>${new Date(o.date).toLocaleString()}</td>
-          </tr>
-        `).join("");
+        tbody.innerHTML = orders.map(o => {
+          let itemsList = "";
+          let total = 0;
+
+          if (Array.isArray(o.items)) {
+            itemsList = "<ul>" + o.items.map(it => {
+              total += it.price * (it.qty || 1);
+              return `<li>${it.name} (${it.size || "-"}) × ${it.qty || 1} — ${it.price} ₽</li>`;
+            }).join("") + "</ul>";
+          }
+
+          return `
+            <tr>
+              <td>${o.id}</td>
+              <td>${itemsList}</td>
+              <td>${total} ₽</td>
+              <td>${o.name}</td>
+              <td>${o.phone}</td>
+              <td>${o.address || ""}</td>
+              <td>${new Date(o.date).toLocaleString()}</td>
+            </tr>
+          `;
+        }).join("");
       } catch (err) {
         console.error("Ошибка при загрузке заказов:", err);
       }
