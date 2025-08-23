@@ -99,11 +99,13 @@ flex-grow: 0;
         const container = document.getElementById("products");
         container.innerHTML = products.map(p => `
           <div class="card">
-            <img src="${p.image}" alt="${p.name}" class="product-image" />
-            <h3>${p.name}</h3>
-            <p class="price">${p.price} ₽</p>
-            <button onclick="order(${p.id})">Купить</button>
-          </div>
+  <img src="images/sakura-shirt.png" alt="Sakura T-shirt" class="product-image" />
+  <h3>Sakura T-shirt</h3>
+  <p class="price">3500 ₽</p>
+  <p class="desc">I hope one day the pink sakura will shine in my soul, it will bloom and never fade.</p>
+  <button>Купить</button>
+</div>
+
         `).join("");
       } catch (err) {
         console.error("Ошибка загрузки товаров:", err);
