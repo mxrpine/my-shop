@@ -99,7 +99,7 @@ flex-grow: 0;
         const container = document.getElementById("products");
         container.innerHTML = products.map(p => `
           <div class="card">
-  <img src="images/tiska.png" alt="Sakura T-shirt" class="product-image" />
+  <img src="images/tiska.jng" alt="Sakura T-shirt" class="product-image" />
   <h3>Sakura T-shirt</h3>
   <p class="price">3500 ₽</p>
   <p class="desc">I hope one day the pink sakura will shine in my soul, it will bloom and never fade.</p>
@@ -113,18 +113,19 @@ flex-grow: 0;
       }
     }
 
-    function order(productId) {
-      const product = products.find(p => p.id === productId);
-      if (!product) return alert("Ошибка: товар не найден.");
+   function order(productId) {
+  const product = products.find(p => p.id === productId);
+  if (!product) return alert("Ошибка: товар не найден.");
 
-      const query = new URLSearchParams({
-        id: product.id,
-        name: product.name,
-        price: product.price
-      }).toString();
+  const query = new URLSearchParams({
+    id: product.id,
+    name: product.name,
+    price: product.price
+  }).toString();
 
-      window.location.href = "checkout.html?" + query;
-    }
+  window.location.href = "checkout.html?" + query;
+}
+
 
     loadProducts();
   </script>
