@@ -30,44 +30,12 @@
       margin-bottom: 10px;
     }
     button {
-      /* Frame 1 */
-
-/* Auto layout */
-display: flex;
-flex-direction: row;
-justify-content: center;
-align-items: center;
-padding: 16px 32px;
-gap: 10px;
-
-position: relative;
-width: 105px;
-height: 47px;
-
-background: #00A2DD;
-border-radius: 20px;
-
-
-/* Купить */
-
-width: 41px;
-height: 15px;
-
-font-family: 'Inter';
-font-style: normal;
-font-weight: 400;
-font-size: 12px;
-line-height: 15px;
-/* identical to box height */
-
-color: #FFFFFF;
-
-
-/* Inside auto layout */
-flex: none;
-order: 0;
-flex-grow: 0;
-
+      padding: 10px 15px;
+      border: none;
+      background: green;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
     }
     button:hover {
       background: darkgreen;
@@ -99,13 +67,11 @@ flex-grow: 0;
         const container = document.getElementById("products");
         container.innerHTML = products.map(p => `
           <div class="card">
-  <img src="images/tiska.jng" alt="Sakura T-shirt" class="product-image" />
-  <h3>Sakura T-shirt</h3>
-  <p class="price">3500 ₽</p>
-  <p class="desc">I hope one day the pink sakura will shine in my soul, it will bloom and never fade.</p>
-  <button>Купить</button>
-</div>
-
+            <img src="${p.image}" alt="${p.name}" class="product-image" />
+            <h3>${p.name}</h3>
+            <p class="price">${p.price} ₽</p>
+            <button onclick="order(${p.id})">Купить</button>
+          </div>
         `).join("");
       } catch (err) {
         console.error("Ошибка загрузки товаров:", err);
@@ -113,19 +79,18 @@ flex-grow: 0;
       }
     }
 
-   function order(productId) {
-  const product = products.find(p => p.id === productId);
-  if (!product) return alert("Ошибка: товар не найден.");
+    function order(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return alert("Ошибка: товар не найден.");
 
-  const query = new URLSearchParams({
-    id: product.id,
-    name: product.name,
-    price: product.price
-  }).toString();
+      const query = new URLSearchParams({
+        id: product.id,
+        name: product.name,
+        price: product.price
+      }).toString();
 
-  window.location.href = "checkout.html?" + query;
-}
-
+      window.location.href = "checkout.html?" + query;
+    }
 
     loadProducts();
   </script>
