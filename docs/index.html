@@ -27,59 +27,52 @@
       padding: 20px;
     }
 
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(18, 18, 18, 0.06);
-      width: 400px;
-      height: 725px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 24px;
-    }
+ .card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 400px;
+  height: 700px; /* фиксированная высота */
+  box-sizing: border-box;
+}
+.card img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 16px;
+}
+.card h3 {
+  font-size: 18px;
+  margin: 8px 0;
+}
+.card .price {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+.card .description {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #666;
+  flex-grow: 1;        /* текст занимает свободное место */
+  overflow-y: auto;    /* если текста больше чем помещается — появится скролл */
+  margin-bottom: 16px;
+}
+.card button {
+  align-self: flex-start;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  background: #00aaff;
+  color: white;
+  cursor: pointer;
+}
+.card button:hover {
+  background: #0088cc;
+}
 
-    .product-image {
-      width: 368px;
-      height: 247px;
-      object-fit: contain;
-      margin: 0 auto 20px auto;
-      display: block;
-    }
-
-    .card h3 {
-      margin: 0 0 8px;
-      font-size: 18px;
-      font-weight: 500;
-    }
-
-    .price {
-      font-weight: 700;
-      margin: 0 0 12px;
-    }
-
-    .description {
-      font-size: 14px;
-      line-height: 1.4;
-      color: #666;
-      margin-bottom: auto;
-    }
-
-    button {
-      padding: 16px 32px;
-      background: #00A2DD;
-      border-radius: 20px;
-      border: none;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0px 6px 8px rgba(0,0,0,0.15);
     }
 
     button:active {
