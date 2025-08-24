@@ -8,23 +8,29 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Читаем товары из файла (для прототипа). В продакшене — БД.
-const productsPath = path.join(__dirname, "db.json");
-let products = JSON.parse(fs.readFileSync(productsPath, "utf-8"));
+const dbPath = path.join(__dirname, "db.json");
 
-// Заказы в памяти
-let orders = [];
+// Читаем базу
+function readDB() {
+  return JSON.parse(fs.readFileSync(dbPath, "utf-8"));
+}
 
-// Логин для админки (хранится на сервере)
+// Записываем базу
+function writeDB(data) {
+  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), "utf-8");
+}
+
+// Логин для админки
 const ADMIN_LOGIN = process.env.ADMIN_LOGIN || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "1234";
 
-// Список товаров
+// --- Товары ---
 app.get("/products", (req, res) => {
-  res.json(products);
+  const db = readDB();
+  res.json(db.products || []);
 });
 
-// Проверка логина
+// --- Авторизация ---
 app.post("/admin/login", (req, res) => {
   const { login, password } = req.body;
   if (login === ADMIN_LOGIN && password === ADMIN_PASSWORD) {
@@ -34,28 +40,49 @@ app.post("/admin/login", (req, res) => {
   }
 });
 
-// Оформление заказа
+// --- Создание заказа ---
 app.post("/order", (req, res) => {
-  const order = req.body || {};
+  const db = readDB();
+  const orders = db.orders || [];
+  const products = db.products || [];
+
+  const orderData = req.body;
+
+  // Нормализуем товары (один или несколько)
+  const items = (orderData.items || [orderData]).map(it => {
+    const product = products.find(p => p.id === it.productId) || {};
+    return {
+      name: it.name || product.name || "Товар",
+      price: it.price || product.price || 0,
+      qty: it.qty || 1,
+      size: it.size || "-",
+      image: product.image || null
+    };
+  });
+
   const newOrder = {
-  id: orders.length + 1,
-  product: order.product,
-  price: order.price,
-  name: order.name,
-  phone: order.phone,
-  address: order.address, // <- здесь добавлено
-  date: new Date()
-};
+    id: orders.length + 1,
+    items,
+    customerName: orderData.name || "",
+    phone: orderData.phone || "",
+    address: orderData.address || "",
+    date: new Date().toISOString()
+  };
+
   orders.push(newOrder);
-  console.log("Новый заказ:", newOrder);
+  db.orders = orders;
+  writeDB(db);
+
+  console.log("📦 Новый заказ:", newOrder);
   res.json({ status: "ok", message: "Заказ принят!" });
 });
 
-// Получение всех заказов
+// --- Получение всех заказов ---
 app.get("/orders", (req, res) => {
-  res.json(orders);
+  const db = readDB();
+  res.json(db.orders || []);
 });
 
-// Запуск сервера
+// --- Запуск ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Сервер запущен на порту ${PORT}`));
